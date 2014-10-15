@@ -20,6 +20,8 @@
         </activity>
         
         <activity android:name=".preferences_Activity" android:label="Настройки"></activity>
+
+        <activity android:name=".FragmentPreferences"/>
     </application>
 
 </manifest>

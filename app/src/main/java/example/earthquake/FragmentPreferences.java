@@ -1,25 +1,19 @@
 package example.earthquake;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
-import android.view.Menu;
-import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.Spinner;
 
-import java.util.prefs.Preferences;
+import java.util.List;
 
 /**
  * Created by nosovpavel on 14/10/14.
  */
 
-public class preferences_Activity extends PreferenceActivity {
+public class FragmentPreferences extends PreferenceActivity {
 
     public static final String USER_PREFERENCE = "USER_PREFERENCE";
     public static final String PREF_AUTO_UPDATE = "PREF_AUTO_UPDATE";
@@ -35,43 +29,9 @@ public class preferences_Activity extends PreferenceActivity {
     Spinner magnitudeSpinner;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-
-
-        addPreferencesFromResource(R.xml.userpreferences);
-//        super.onCreate(savedInstanceState);
-//        setContentView(R.layout.preferences);
-//
-//        updateFreqSpinner = (Spinner) findViewById(R.id.spinner_update_freq);
-//        magnitudeSpinner = (Spinner) findViewById(R.id.spinner_quake_mag);
-//
-//        autoUpdate = (CheckBox) findViewById(R.id.checkbox_auto_update);
-//
-//        populateSpinners();
-//
-//        Context context = getApplicationContext();
-//        prefs= PreferenceManager.getDefaultSharedPreferences(context);
-//
-//        updateUIFromPreferences();
-//
-//        Button okButton = (Button) findViewById(R.id.okButton);
-//        okButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                savePreferences();
-//                preferences_Activity.this.setResult(RESULT_OK);
-//                finish();
-//            }
-//        });
-//
-//        Button cancelButton = (Button) findViewById(R.id.cancelButton);
-//        cancelButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                preferences_Activity.this.setResult(RESULT_CANCELED);
-//                finish();
-//            }
-//        });
+    public void onBuildHeaders(List<Header> target) {
+        super.onBuildHeaders(target);
+        loadHeadersFromResource(R.xml.preference_headers,target);
     }
 
     private void savePreferences() {
