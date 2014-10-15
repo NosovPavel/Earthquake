@@ -19,13 +19,11 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-//import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.Date;
-
+import java.util.GregorianCalendar;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -92,7 +90,7 @@ public class EarthQuakeListFragment extends ListFragment {
                 //Получаем список всех записей о землетрясениях
 
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-'T'hh:mm:ss'Z'");
-                Date qdate = (Date) new GregorianCalendar(0,0,0).getTime();
+                Date qdate = new GregorianCalendar(0,0,0).getTime();
 
                 NodeList nl = docEle.getElementsByTagName("entry");
                 if (nl != null && nl.getLength()>0){
@@ -106,7 +104,8 @@ public class EarthQuakeListFragment extends ListFragment {
                         String details = title.getFirstChild().getNodeValue();
                         String hostName = "http://earthquake.usgs.gov";
                         String linkString = hostName+link.getAttribute("href");
-                        String point;                        if (q!=null) {
+                        String point;
+                        if (q!=null) {
                             point = q.getFirstChild().getNodeValue();
                         } else {
                             point = "12.4670 -88.2750";
@@ -114,10 +113,10 @@ public class EarthQuakeListFragment extends ListFragment {
                         String dt = when.getFirstChild().getNodeValue();
 
                         try {
-                            qdate = (Date) sdf.parse(dt);
+                            qdate = sdf.parse(dt);
                         } catch (ParseException e) {
                             e.printStackTrace();
-                            Log.d(TAG,"Date Parsing Exception");
+                            Log.d(TAG,"Daste Parsing Exception");
                         }
 
                         String[] location = point.split(" ");
@@ -165,7 +164,14 @@ public class EarthQuakeListFragment extends ListFragment {
     }
 
     private void addNewQuake(Quake _quake) {
-        earhquakes.add(_quake);
+
+        main mainactivity = (main) getActivity();
+
+        if(_quake.getMagnitude()>mainactivity.minimumMagnitude){
+            earhquakes.add(_quake);
+        }
+
+//        earhquakes.add(_quake);
         aa.notifyDataSetChanged();
     }
 

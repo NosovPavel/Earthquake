@@ -7,4 +7,10 @@
 
     <string name="earth_Quake_Feed">http://earthquake.usgs.gov/earthquakes/catalogs/1day-M2.5.xml</string>
 
+    <string name="menu_update">Обновить землетрясения?</string>
+    <string name="auto_update_promt">Автообновление?</string>
+    <string name="update_freq_promt">Частота обновлений</string>
+    <string name="min_quake_mag_promt">Минимальная амплитуда колебаний</string>
+    <string name="menu_preferences">Настройки</string>
+
 </resources>
