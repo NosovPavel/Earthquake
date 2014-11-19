@@ -21,5 +21,5 @@
         android:entries="@array/magnitude_options"
         android:entryValues="@array/magnitude"
         android:dialogTitle="Magnitude"
-        android:defaultValue="3"/>
+        android:defaultValue="0"/>
 </PreferenceScreen>

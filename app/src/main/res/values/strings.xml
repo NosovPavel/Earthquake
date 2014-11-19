@@ -12,5 +12,8 @@
     <string name="update_freq_promt">Частота обновлений</string>
     <string name="min_quake_mag_promt">Минимальная амплитуда колебаний</string>
     <string name="menu_preferences">Настройки</string>
+    
+    <string name="search_description">Search earthquake locations</string>
+
 
 </resources>

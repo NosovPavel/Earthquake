@@ -1,12 +1,19 @@
 package example.earthquake;
 import android.app.ListFragment;
+import android.app.LoaderManager;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.Cursor;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.DocumentsContract;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+import android.widget.SimpleCursorAdapter;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -19,11 +26,15 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.TimeZone;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -32,9 +43,10 @@ import javax.xml.parsers.ParserConfigurationException;
  * Created by nosovpavel on 13/10/14.
  */
 
-public class EarthQuakeListFragment extends ListFragment {
+public class EarthQuakeListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    ArrayAdapter<Quake> aa;
+//    ArrayAdapter<Quake> aa;
+    SimpleCursorAdapter adapter;
     ArrayList<Quake> earhquakes = new ArrayList<Quake>();
 
     private static final String TAG = "EARTHQUAKE";
@@ -48,9 +60,14 @@ public class EarthQuakeListFragment extends ListFragment {
         super.onActivityCreated(savedInstanceState);
 
         int LayoutId = android.R.layout.simple_list_item_1;
-        aa = new ArrayAdapter<Quake>(getActivity(), LayoutId,earhquakes);
-        setListAdapter(aa);
+//        aa = new ArrayAdapter<Quake>(getActivity(), LayoutId,earhquakes);
+//        setListAdapter(aa);
 
+        adapter = new SimpleCursorAdapter(getActivity(),android.R.layout.simple_list_item_1,null,new String[]{EarthQuakeProvider.KEY_SUMMARY},new int[]{android.R.id.text1},0);
+        setListAdapter(adapter);
+
+        getLoaderManager().initLoader(0,null,this);
+//
 
         Thread t = new Thread(new Runnable() {
             @Override
@@ -64,6 +81,16 @@ public class EarthQuakeListFragment extends ListFragment {
 
 
     public void refreshEarthQuakes(){
+
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                getLoaderManager().restartLoader(0,null,EarthQuakeListFragment.this);
+            }
+        });
+
+
         URL url;
 
         try{
@@ -89,7 +116,9 @@ public class EarthQuakeListFragment extends ListFragment {
 
                 //Получаем список всех записей о землетрясениях
 
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-'T'hh:mm:ss'Z'");
+//                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+                DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+//                sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                 Date qdate = new GregorianCalendar(0,0,0).getTime();
 
                 NodeList nl = docEle.getElementsByTagName("entry");
@@ -113,10 +142,10 @@ public class EarthQuakeListFragment extends ListFragment {
                         String dt = when.getFirstChild().getNodeValue();
 
                         try {
-                            qdate = sdf.parse(dt);
+                            qdate =  (Date) formatter.parse(dt);
                         } catch (ParseException e) {
                             e.printStackTrace();
-                            Log.d(TAG,"Daste Parsing Exception");
+                            Log.d(TAG,"Date Parsing Exception");
                         }
 
                         String[] location = point.split(" ");
@@ -165,14 +194,59 @@ public class EarthQuakeListFragment extends ListFragment {
 
     private void addNewQuake(Quake _quake) {
 
-        main mainactivity = (main) getActivity();
+//        main mainactivity = (main) getActivity();
+//
+//        if(_quake.getMagnitude()>mainactivity.minimumMagnitude){
+//            earhquakes.add(_quake);
+//        }
+//
+////        earhquakes.add(_quake);
+//        aa.notifyDataSetChanged();
 
-        if(_quake.getMagnitude()>mainactivity.minimumMagnitude){
-            earhquakes.add(_quake);
+        ContentResolver cr = getActivity().getContentResolver();
+        String w = EarthQuakeProvider.KEY_DATE + " = " + _quake.getDate().getTime();
+
+        Cursor query = cr.query(EarthQuakeProvider.CONTENT_URI,null,w,null,null);
+
+        if(query.getCount()==0){
+            ContentValues values = new ContentValues();
+            values.put(EarthQuakeProvider.KEY_DATE,_quake.getDate().getTime());
+            values.put(EarthQuakeProvider.KEY_DETAILS,_quake.getDetails());
+            values.put(EarthQuakeProvider.KEY_SUMMARY,_quake.toString());
+
+            double lat = _quake.getLocation().getLatitude();
+            double lng = _quake.getLocation().getLongitude();
+
+            values.put(EarthQuakeProvider.KEY_LOCATION_LAT,lat);
+            values.put(EarthQuakeProvider.KEY_LOCATION_LNG,lng);
+
+            values.put(EarthQuakeProvider.KEY_LINK,_quake.getLink());
+            values.put(EarthQuakeProvider.KEY_MAGNITUDE,_quake.getMagnitude());
+
+            cr.insert(EarthQuakeProvider.CONTENT_URI,values);
+
         }
-
-//        earhquakes.add(_quake);
-        aa.notifyDataSetChanged();
+        query.close();
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
+        String[] projection = new String[]{EarthQuakeProvider.KEY_ID, EarthQuakeProvider.KEY_SUMMARY};
+        main earthquakeActivity = (main)getActivity();
+
+        String where = EarthQuakeProvider.KEY_MAGNITUDE  + "> " + earthquakeActivity.minimumMagnitude;
+
+        CursorLoader cr = new CursorLoader(getActivity(),EarthQuakeProvider.CONTENT_URI,projection,where,null,null);
+        return cr;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        adapter.swapCursor(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        adapter.swapCursor(null);
+    }
 }

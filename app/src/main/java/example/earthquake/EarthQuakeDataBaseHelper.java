@@ -18,7 +18,7 @@ public class EarthQuakeDataBaseHelper extends SQLiteOpenHelper {
     public static final String EARTHQUAKE_TABLE = "earthquakes";
 
     private 	static 	final 	String 	DATABASE_CREATE  =
-            "create  table  “  +  EARTHQUAKE_TABLE  +  ("
+            "create  table  "  +  EARTHQUAKE_TABLE  +  " ("
             +  EarthQuakeProvider.KEY_ID  +  "  integer  primary  key  autoincrement,  "
             +  EarthQuakeProvider.KEY_DATE  +  "  INTEGER,  "
             +  EarthQuakeProvider.KEY_DETAILS  +  "  TEXT,  "
@@ -40,7 +40,7 @@ public class EarthQuakeDataBaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        earthQuakeDB.execSQL(DATABASE_CREATE);
+        sqLiteDatabase.execSQL(DATABASE_CREATE);
     }
 
     @Override

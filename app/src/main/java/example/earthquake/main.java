@@ -19,9 +19,6 @@ import android.view.MenuInflater;
 
 public class main extends ActionBarActivity {
 
-    private ProgressDialog progressBar;
-    static final private int MENU_PREFERENCE = Menu.FIRST+1;
-    static final private int MENU_UPDATE = Menu.FIRST+2;
     static final private int SHOW_PREFERENCES = 1;
 
     public int minimumMagnitude = 0;
@@ -65,26 +62,6 @@ public class main extends ActionBarActivity {
         updateFreq = Integer.parseInt(prefs.getString(preferences_Activity.PREF_UPDATE_FREQ, "60"));
 
         autoUpdateChecked = prefs.getBoolean(preferences_Activity.PREF_AUTO_UPDATE,false);
-
-//        int minMagIndex = prefs.getInt(preferences_Activity.PREF_MIN_MAG_INDEX,0);
-//        if(minMagIndex<0){
-//            minMagIndex = 0;
-//        }
-//
-//        int freqIndex = prefs.getInt(preferences_Activity.PREF_UPDATE_FREQ_INDEX,0);
-//        if(freqIndex<0){
-//            freqIndex = 0;
-//        }
-//
-//        autoUpdateChecked = prefs.getBoolean(preferences_Activity.PREF_AUTO_UPDATE,false);
-//
-//        Resources resources = getResources();
-//
-//        String[] minMagValues = resources.getStringArray(R.array.magnitude);
-//        String[] freqValues = resources.getStringArray(R.array.update_freq_values);
-//
-//        minimumMagnitude = Integer.valueOf(minMagValues[minMagIndex]);
-//        updateFreq = Integer.valueOf(freqValues[freqIndex]);
     }
 
     @Override
@@ -105,22 +82,5 @@ public class main extends ActionBarActivity {
                     }
                 });
                 t.start();
-
-
-//        if(requestCode == SHOW_PREFERENCES){
-//            if(resultCode == Activity.RESULT_OK){
-//                updateFromPreferences();
-//                FragmentManager fm = getFragmentManager();
-//                final EarthQuakeListFragment earthQuakeListFragment = (EarthQuakeListFragment) fm.findFragmentById(R.id.EarthQuakeListFragment);
-//
-//                Thread t = new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        earthQuakeListFragment.refreshEarthQuakes();
-//                    }
-//                });
-//                t.start();
-//            }
-//        }
     }
 }
