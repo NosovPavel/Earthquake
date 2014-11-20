@@ -5,12 +5,14 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 
-    <string name="earth_Quake_Feed">http://earthquake.usgs.gov/earthquakes/catalogs/1day-M2.5.xml</string>
+    <!--<string name="earth_Quake_Feed">http://earthquake.usgs.gov/earthquakes/catalogs/1day-M2.5.xml</string>-->
+
+    <string name="earth_Quake_Feed">http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.atom</string>
 
     <string name="menu_update">Обновить землетрясения?</string>
     <string name="auto_update_promt">Автообновление?</string>
     <string name="update_freq_promt">Частота обновлений</string>
-    <string name="min_quake_mag_promt">Минимальная амплитуда колебаний</string>
+    <string name="min_quake_mag_promt"> Минимальная амплитуда колебаний</string>
     <string name="menu_preferences">Настройки</string>
     
     <string name="search_description">Search earthquake locations</string>

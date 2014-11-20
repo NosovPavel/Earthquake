@@ -125,8 +125,9 @@ public class EarthQuakeProvider extends ContentProvider {
             Uri uri = ContentUris.withAppendedId(CONTENT_URI, rowId);
             getContext().getContentResolver().notifyChange(uri, null);
             return uri;
+        } else {
+            return null;
         }
-        return null;
 //        } else {
 //            Log.w(EarthQuakeDataBaseHelper.TAG,"Failed to insert row into " + _uri);
 //        }

@@ -25,6 +25,29 @@
         <provider
             android:authorities="com.paad.earthquakeprovider"
             android:name=".EarthQuakeProvider"/>
+
+        <receiver android:name=".EarthQuakeAlarmReciever">
+            <intent-filter>
+                <action android:name="com.paad.earthquake.ACTION_REFRESH_EARTHQUAKE_ALARM"/>
+            </intent-filter>
+        </receiver>
+
+    
+        <activity android:name=".EarthQuakeSearchResults"
+            android:label="Earthquake Search"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable"
+                />
+        </activity>
+        
+        <service android:name=".EarthQuakeService" android:enabled="true"/>
+
     </application>
 
 </manifest>

@@ -75,12 +75,12 @@ public class main extends ActionBarActivity {
         FragmentManager fm = getFragmentManager();
         final EarthQuakeListFragment elf= (EarthQuakeListFragment) fm.findFragmentById(R.id.EarthQuakeListFragment);
 
-                Thread t = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        elf.refreshEarthQuakes();
-                    }
-                });
-                t.start();
+//                Thread t = new Thread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        elf.refreshEarthQuakes();
+//                    }
+//                });
+//                t.start();
     }
 }
