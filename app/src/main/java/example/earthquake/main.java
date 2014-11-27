@@ -17,13 +17,16 @@ import android.view.MenuItem;
 import android.view.MenuInflater;
 
 
-public class main extends ActionBarActivity {
+public class main extends Activity {
 
     static final private int SHOW_PREFERENCES = 1;
 
     public int minimumMagnitude = 0;
     public boolean autoUpdateChecked = false;
     public int updateFreq = 0;
+
+    TabListener<EarthQuakeListFragment> listTabListener;
+    TabListener<earthQuakeMapFragment> mapTabListener;
 
 
     @Override
@@ -70,10 +73,11 @@ public class main extends ActionBarActivity {
 
         if(requestCode == SHOW_PREFERENCES){
             updateFromPreferences();
+
         }
 
-        FragmentManager fm = getFragmentManager();
-        final EarthQuakeListFragment elf= (EarthQuakeListFragment) fm.findFragmentById(R.id.EarthQuakeListFragment);
+//        FragmentManager fm = getFragmentManager();
+//        final EarthQuakeListFragment elf= (EarthQuakeListFragment) fm.findFragmentById(R.id.EarthQuakeListFragment);
 
 //                Thread t = new Thread(new Runnable() {
 //                    @Override
