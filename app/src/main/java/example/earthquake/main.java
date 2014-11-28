@@ -1,8 +1,12 @@
 package example.earthquake;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
+import android.app.SearchManager;
+import android.app.SearchableInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,7 +18,9 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.MenuInflater;
+import android.widget.SearchView;
 
 
 public class main extends Activity {
@@ -35,6 +41,45 @@ public class main extends Activity {
         setContentView(R.layout.activity_main);
 
         updateFromPreferences();
+
+        // Use the Search Manager to find the SearchableInfo related to this
+        // Activity.
+        SearchManager searchManager =
+                (SearchManager)getSystemService(Context.SEARCH_SERVICE);
+        SearchableInfo searchableInfo =
+                searchManager.getSearchableInfo(getComponentName());
+
+        // Bind the Activity's SearchableInfo to the Search View
+        SearchView searchView = (SearchView)findViewById(R.id.searchView);
+        searchView.setSearchableInfo(searchableInfo);
+
+        ActionBar actionBar = getActionBar();
+
+        View fragmentContainer = findViewById(R.id.EarthQuakeFragmentContainer);
+
+        boolean tabletLayout = fragmentContainer == null;
+
+        if(!tabletLayout){
+            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+            actionBar.setDisplayShowTitleEnabled(false);
+
+            ActionBar.Tab listTab = actionBar.newTab();
+
+            listTabListener = new TabListener<EarthQuakeListFragment>(this,R.id.EarthQuakeFragmentContainer,EarthQuakeListFragment.class);
+
+            listTab.setText("List of earthquakes").setTabListener(listTabListener);
+
+            actionBar.addTab(listTab);
+
+            //map
+
+            ActionBar.Tab mapTab = actionBar.newTab();
+            mapTabListener = new TabListener<earthQuakeMapFragment>(this,R.id.EarthQuakeFragmentContainer,earthQuakeMapFragment.class);
+
+            mapTab.setText("Map of earthquakes").setTabListener(mapTabListener);
+
+            actionBar.addTab(mapTab);
+        }
     }
 
     @Override
@@ -75,16 +120,65 @@ public class main extends Activity {
             updateFromPreferences();
 
         }
+    }
 
-//        FragmentManager fm = getFragmentManager();
-//        final EarthQuakeListFragment elf= (EarthQuakeListFragment) fm.findFragmentById(R.id.EarthQuakeListFragment);
+    private static String ACTION_BAR_INDEX = "ACTION_BAR_INDEX";
 
-//                Thread t = new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        elf.refreshEarthQuakes();
-//                    }
-//                });
-//                t.start();
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        View fragmentContainer = findViewById(R.id.EarthQuakeFragmentContainer);
+        boolean tabletLayout = fragmentContainer == null;
+
+        if (!tabletLayout) {
+            // Save the current Action Bar tab selection
+            int actionBarIndex = getActionBar().getSelectedTab().getPosition();
+            SharedPreferences.Editor editor = getPreferences(Activity.MODE_PRIVATE).edit();
+            editor.putInt(ACTION_BAR_INDEX, actionBarIndex);
+            editor.apply();
+
+            // Detach each of the Fragments
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            if (mapTabListener.fragment != null)
+                ft.detach(mapTabListener.fragment);
+            if (listTabListener.fragment != null)
+                ft.detach(listTabListener.fragment);
+            ft.commit();
+        }
+
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        View fragmentContainer = findViewById(R.id.EarthQuakeFragmentContainer);
+        boolean tabletLayout = fragmentContainer == null;
+
+        if (!tabletLayout) {
+            // Find the recreated Fragments and assign them to their associated Tab Listeners.
+            listTabListener.fragment =
+                    getFragmentManager().findFragmentByTag(EarthQuakeListFragment.class.getName());
+            mapTabListener.fragment =
+                    getFragmentManager().findFragmentByTag(earthQuakeMapFragment.class.getName());
+
+            // Restore the previous Action Bar tab selection.
+            SharedPreferences sp = getPreferences(Activity.MODE_PRIVATE);
+            int actionBarIndex = sp.getInt(ACTION_BAR_INDEX, 0);
+            getActionBar().setSelectedNavigationItem(actionBarIndex);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        View fragmentContainer = findViewById(R.id.EarthQuakeFragmentContainer);
+        boolean tabletLayout = fragmentContainer == null;
+
+        if (!tabletLayout) {
+            SharedPreferences sp = getPreferences(Activity.MODE_PRIVATE);
+            int actionBarIndex = sp.getInt(ACTION_BAR_INDEX, 0);
+            getActionBar().setSelectedNavigationItem(actionBarIndex);
+        }
     }
 }

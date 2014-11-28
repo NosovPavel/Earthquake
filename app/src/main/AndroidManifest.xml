@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="example.earthquake" >
     <uses-sdk android:targetSdkVersion="19"
-            android:minSdkVersion="11"/>
+            android:minSdkVersion="13"/>
     
     <uses-permission android:name="android.permission.INTERNET"/>
 
