@@ -42,16 +42,7 @@ public class main extends Activity {
 
         updateFromPreferences();
 
-        // Use the Search Manager to find the SearchableInfo related to this
-        // Activity.
-        SearchManager searchManager =
-                (SearchManager)getSystemService(Context.SEARCH_SERVICE);
-        SearchableInfo searchableInfo =
-                searchManager.getSearchableInfo(getComponentName());
 
-        // Bind the Activity's SearchableInfo to the Search View
-        SearchView searchView = (SearchView)findViewById(R.id.searchView);
-        searchView.setSearchableInfo(searchableInfo);
 
         ActionBar actionBar = getActionBar();
 
@@ -84,8 +75,24 @@ public class main extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main,menu);
+
+        // Use the Search Manager to find the SearchableInfo related to this
+        // Activity.
+        SearchManager searchManager =
+                (SearchManager)getSystemService(Context.SEARCH_SERVICE);
+        SearchableInfo searchableInfo =
+                searchManager.getSearchableInfo(getComponentName());
+
+        // Bind the Activity's SearchableInfo to the Search View
+        SearchView searchView = (SearchView)menu.findItem(R.id.menu_search).getActionView();
+        searchView.setSearchableInfo(searchableInfo);
+
+
         // Inflate the menu; this adds items to the action bar if it is present.
-        menu.add(0,1,0, R.string.menu_preferences);
+//        menu.add(0,1,0, R.string.menu_preferences);
         return true;
     }
 
@@ -96,10 +103,22 @@ public class main extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         super.onOptionsItemSelected(item);
 
+        switch (item.getItemId()){
+            case (R.id.menu_refresh):{
+                startService(new Intent(this, EarthQuakeService.class));
+                return true;
+            }
+            case (R.id.menu_settings):{
                 Class c = Build.VERSION.SDK_INT<Build.VERSION_CODES.HONEYCOMB? PreferenceActivity.class:FragmentPreferences.class;
                 Intent i = new Intent(this,c);
                 startActivityForResult(i,SHOW_PREFERENCES);
                 return true;
+            }
+
+            default:
+                return false;
+        }
+
     }
 
     public void updateFromPreferences(){
