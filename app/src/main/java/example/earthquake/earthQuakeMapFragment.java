@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 /**
  * Created by nosovpavel on 26/11/14.
  */
-public class earthQuakeMapFragment extends Fragment {
+public class EarthQuakeMapFragment extends Fragment {
 
     @Nullable
     @Override

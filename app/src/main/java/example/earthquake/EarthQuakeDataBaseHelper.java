@@ -8,6 +8,17 @@ import android.util.Log;
 
 /**
  * Created by nosovpavel on 18/11/14.
+ *  SQLiteOpenHelper  —  абстрактный  класс,  предназначенный  для  реализации  наибо
+ * лее  эффективной  модели,  с  помощью  которой  можно  создавать,  открывать  и  обновлять
+ * базы  данных.  При  реализации  этого  вспомогательного  класса  от  вас  скрывается  логика,
+ * на  основе  которой  принимается  решение  о  создании  или  обновлении  базы  данных
+ * перед  ее  открытием.  Кроме  того,  вы  получаете  гарантию,  что  каждая  операция  будет
+ * выполнена  самым  рациональным  образом.
+ * Рекомендуется  создавать  и  открывать  базы  данных  по  мере  их  необходимости.
+ * SQLiteOpenHelper  кэширует  экземпляры  баз  данных  после  их  успешного  открытия,
+ * поэтому  сразу  перед  выполнением  запросов  или  транзакций  вы  должны  открыть
+ * базу  данных.  По  той  же  причине  нет  необходимости  закрывать  базу  данных  вруч
+ * ную,  разве  что  вы  больше  никогда  не  будете  ее  снова  использовать.
  */
 public class EarthQuakeDataBaseHelper extends SQLiteOpenHelper {
 
@@ -17,16 +28,16 @@ public class EarthQuakeDataBaseHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;
     public static final String EARTHQUAKE_TABLE = "earthquakes";
 
-    private 	static 	final 	String 	DATABASE_CREATE  =
-            "create  table  "  +  EARTHQUAKE_TABLE  +  " ("
-            +  EarthQuakeProvider.KEY_ID  +  "  integer  primary  key  autoincrement,  "
-            +  EarthQuakeProvider.KEY_DATE  +  "  INTEGER,  "
-            +  EarthQuakeProvider.KEY_DETAILS  +  "  TEXT,  "
-            +  EarthQuakeProvider.KEY_SUMMARY  +  "  TEXT,  "
-            +  EarthQuakeProvider.KEY_LOCATION_LAT  +  "  FLOAT,  "
-            +  EarthQuakeProvider.KEY_LOCATION_LNG  +  "  FLOAT,  "
-            +  EarthQuakeProvider.KEY_MAGNITUDE  +  "  FLOAT,  "
-            +  EarthQuakeProvider.KEY_LINK  +  "  TEXT);";
+    private static final String DATABASE_CREATE  =
+                "create  table  "  +  EARTHQUAKE_TABLE  +  " ("
+            +  EarthQuakeContentProvider.KEY_ID  +  "  integer  primary  key  autoincrement,  "
+            +  EarthQuakeContentProvider.KEY_DATE  +  "  INTEGER,  "
+            +  EarthQuakeContentProvider.KEY_DETAILS  +  "  TEXT,  "
+            +  EarthQuakeContentProvider.KEY_SUMMARY  +  "  TEXT,  "
+            +  EarthQuakeContentProvider.KEY_LOCATION_LAT  +  "  FLOAT,  "
+            +  EarthQuakeContentProvider.KEY_LOCATION_LNG  +  "  FLOAT,  "
+            +  EarthQuakeContentProvider.KEY_MAGNITUDE  +  "  FLOAT,  "
+            +  EarthQuakeContentProvider.KEY_LINK  +  "  TEXT);";
 
     private SQLiteDatabase earthQuakeDB;
 

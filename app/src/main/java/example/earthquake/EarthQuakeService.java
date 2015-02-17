@@ -31,7 +31,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -43,6 +42,9 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class EarthQuakeService extends Service {
     public static final String TAG = "EARTHQUAKE_UPDATE_SERVICE";
+    public static final String PREF_AUTO_UPDATE = "PREF_AUTO_UPDATE";
+    public static final String PREF_MIN_MAG = "PREF_MIN_MAG";
+    public static final String PREF_UPDATE_FREQ = "PREF_UPDATE_FREQ";
 
     private AlarmManager alarmManager;
     private PendingIntent alarmIntent;
@@ -56,26 +58,26 @@ public class EarthQuakeService extends Service {
     private void addNewQuake(Quake _quake) {
 
         ContentResolver cr = getContentResolver();
-        String w = EarthQuakeProvider.KEY_DATE + " = " + _quake.getDate().getTime();
+        String where = EarthQuakeContentProvider.KEY_DATE + " = " + _quake.getDate().getTime();
 
-        Cursor query = cr.query(EarthQuakeProvider.CONTENT_URI,null,w,null,null);
+        Cursor query = cr.query(EarthQuakeContentProvider.CONTENT_URI,null,where,null,null);
 
         if(query.getCount()==0){
             ContentValues values = new ContentValues();
-            values.put(EarthQuakeProvider.KEY_DATE,_quake.getDate().getTime());
-            values.put(EarthQuakeProvider.KEY_DETAILS,_quake.getDetails());
-            values.put(EarthQuakeProvider.KEY_SUMMARY,_quake.toString());
+            values.put(EarthQuakeContentProvider.KEY_DATE,_quake.getDate().getTime());
+            values.put(EarthQuakeContentProvider.KEY_DETAILS,_quake.getDetails());
+            values.put(EarthQuakeContentProvider.KEY_SUMMARY,_quake.toString());
 
             double lat = _quake.getLocation().getLatitude();
             double lng = _quake.getLocation().getLongitude();
 
-            values.put(EarthQuakeProvider.KEY_LOCATION_LAT,lat);
-            values.put(EarthQuakeProvider.KEY_LOCATION_LNG,lng);
+            values.put(EarthQuakeContentProvider.KEY_LOCATION_LAT,lat);
+            values.put(EarthQuakeContentProvider.KEY_LOCATION_LNG,lng);
 
-            values.put(EarthQuakeProvider.KEY_LINK,_quake.getLink());
-            values.put(EarthQuakeProvider.KEY_MAGNITUDE,_quake.getMagnitude());
+            values.put(EarthQuakeContentProvider.KEY_LINK,_quake.getLink());
+            values.put(EarthQuakeContentProvider.KEY_MAGNITUDE,_quake.getMagnitude());
 
-            cr.insert(EarthQuakeProvider.CONTENT_URI,values);
+            cr.insert(EarthQuakeContentProvider.CONTENT_URI,values);
 
         }
         query.close();
@@ -187,8 +189,8 @@ public class EarthQuakeService extends Service {
             //  Получите  Общие  настройки.
             Context context  =  getApplicationContext();
             SharedPreferences prefs  =  PreferenceManager.getDefaultSharedPreferences(context);
-            int  updateFreq  =  Integer.parseInt(prefs.getString(preferences_Activity.PREF_UPDATE_FREQ, "60"));
-            boolean  autoUpdateChecked  =  prefs.getBoolean(preferences_Activity.PREF_AUTO_UPDATE,  false);
+            int  updateFreq  =  Integer.parseInt(prefs.getString(PREF_UPDATE_FREQ, "60"));
+            boolean  autoUpdateChecked  =  prefs.getBoolean(PREF_AUTO_UPDATE,  false);
 
             if  (autoUpdateChecked)  {
 

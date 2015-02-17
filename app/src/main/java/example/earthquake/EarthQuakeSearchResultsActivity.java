@@ -13,7 +13,7 @@ import android.widget.SimpleCursorAdapter;
 /**
  * Created by nosovpavel on 20/11/14.
  */
-public class EarthQuakeSearchResults extends ListActivity implements LoaderManager.LoaderCallbacks {
+public class EarthQuakeSearchResultsActivity extends ListActivity implements LoaderManager.LoaderCallbacks {
 
     private SimpleCursorAdapter adapter;
 
@@ -24,7 +24,7 @@ public class EarthQuakeSearchResults extends ListActivity implements LoaderManag
         // Create a new adapter and bind it to the List View
         adapter = new SimpleCursorAdapter(this,
                 android.R.layout.simple_list_item_1, null,
-                new String[] { EarthQuakeProvider.KEY_SUMMARY },
+                new String[] { EarthQuakeContentProvider.KEY_SUMMARY },
                 new int[] { android.R.id.text1 }, 0);
         setListAdapter(adapter);
 
@@ -68,15 +68,15 @@ public class EarthQuakeSearchResults extends ListActivity implements LoaderManag
         }
 
         // Construct the new query in the form of a Cursor Loader.
-        String[] projection = { EarthQuakeProvider.KEY_ID,
-                EarthQuakeProvider.KEY_SUMMARY };
-        String where = EarthQuakeProvider.KEY_SUMMARY
+        String[] projection = { EarthQuakeContentProvider.KEY_ID,
+                EarthQuakeContentProvider.KEY_SUMMARY };
+        String where = EarthQuakeContentProvider.KEY_SUMMARY
                 + " LIKE \"%" + query + "%\"";
         String[] whereArgs = null;
-        String sortOrder = EarthQuakeProvider.KEY_SUMMARY + " COLLATE LOCALIZED ASC";
+        String sortOrder = EarthQuakeContentProvider.KEY_SUMMARY + " COLLATE LOCALIZED ASC";
 
         // Create the new Cursor loader.
-        return new CursorLoader(this, EarthQuakeProvider.CONTENT_URI,
+        return new CursorLoader(this, EarthQuakeContentProvider.CONTENT_URI,
                 projection, where, whereArgs,
                 sortOrder);
     }

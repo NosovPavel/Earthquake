@@ -2,19 +2,13 @@ package example.earthquake;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.os.Build;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,7 +17,7 @@ import android.view.MenuInflater;
 import android.widget.SearchView;
 
 
-public class main extends Activity {
+public class MainActivity extends Activity {
 
     static final private int SHOW_PREFERENCES = 1;
 
@@ -32,7 +26,7 @@ public class main extends Activity {
     public int updateFreq = 0;
 
     TabListener<EarthQuakeListFragment> listTabListener;
-    TabListener<earthQuakeMapFragment> mapTabListener;
+    TabListener<EarthQuakeMapFragment> mapTabListener;
 
 
     @Override
@@ -40,9 +34,13 @@ public class main extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        updateFromPreferences();
+        getNewDataFromPreferences();
 
-
+//
+//        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+//        SearchableInfo searchableInfo = searchManager.getSearchableInfo(getComponentName());
+//        SearchView searchView = (SearchView) findViewById(R.id.searchView);
+//        searchView.setSearchableInfo(searchableInfo);
 
         ActionBar actionBar = getActionBar();
 
@@ -65,7 +63,7 @@ public class main extends Activity {
             //map
 
             ActionBar.Tab mapTab = actionBar.newTab();
-            mapTabListener = new TabListener<earthQuakeMapFragment>(this,R.id.EarthQuakeFragmentContainer,earthQuakeMapFragment.class);
+            mapTabListener = new TabListener<EarthQuakeMapFragment>(this,R.id.EarthQuakeFragmentContainer,EarthQuakeMapFragment.class);
 
             mapTab.setText("Map of earthquakes").setTabListener(mapTabListener);
 
@@ -103,32 +101,29 @@ public class main extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         super.onOptionsItemSelected(item);
 
-        switch (item.getItemId()){
-            case (R.id.menu_refresh):{
+        boolean returnValue = false;
+
+            if (item.getItemId() == R.id.menu_refresh){
                 startService(new Intent(this, EarthQuakeService.class));
-                return true;
+                returnValue =  true;
             }
-            case (R.id.menu_settings):{
-                Class c = Build.VERSION.SDK_INT<Build.VERSION_CODES.HONEYCOMB? PreferenceActivity.class:FragmentPreferences.class;
+            if (item.getItemId() == R.id.menu_settings){
+//                Class c = Build.VERSION.SDK_INT<Build.VERSION_CODES.HONEYCOMB? PreferenceActivity.class:EarthQuakePreferenceActivity.class;
+                Class c = EarthQuakePreferenceActivity.class;
                 Intent i = new Intent(this,c);
                 startActivityForResult(i,SHOW_PREFERENCES);
-                return true;
+                returnValue = true;
             }
-
-            default:
-                return false;
-        }
-
+        return returnValue;
     }
 
-    public void updateFromPreferences(){
+    public void getNewDataFromPreferences(){
         Context context = getApplicationContext();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
-        minimumMagnitude = Integer.parseInt(prefs.getString(preferences_Activity.PREF_MIN_MAG,"3"));
-        updateFreq = Integer.parseInt(prefs.getString(preferences_Activity.PREF_UPDATE_FREQ, "60"));
-
-        autoUpdateChecked = prefs.getBoolean(preferences_Activity.PREF_AUTO_UPDATE,false);
+        minimumMagnitude = Integer.parseInt(prefs.getString(EarthQuakeService.PREF_MIN_MAG,"1"));
+        updateFreq = Integer.parseInt(prefs.getString(EarthQuakeService.PREF_UPDATE_FREQ, "60"));
+        autoUpdateChecked = prefs.getBoolean(EarthQuakeService.PREF_AUTO_UPDATE,false);
     }
 
     @Override
@@ -136,8 +131,7 @@ public class main extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode == SHOW_PREFERENCES){
-            updateFromPreferences();
-
+            getNewDataFromPreferences();
         }
     }
 
@@ -179,7 +173,7 @@ public class main extends Activity {
             listTabListener.fragment =
                     getFragmentManager().findFragmentByTag(EarthQuakeListFragment.class.getName());
             mapTabListener.fragment =
-                    getFragmentManager().findFragmentByTag(earthQuakeMapFragment.class.getName());
+                    getFragmentManager().findFragmentByTag(EarthQuakeMapFragment.class.getName());
 
             // Restore the previous Action Bar tab selection.
             SharedPreferences sp = getPreferences(Activity.MODE_PRIVATE);

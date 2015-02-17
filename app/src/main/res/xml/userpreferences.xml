@@ -4,7 +4,7 @@
 
 <CheckBoxPreference android:key="PREF_AUTO_UPDATE"
                     android:title="Auto refresh"
-                    android:summary="Select to rurn on automatic updating"
+                    android:summary="Select to run on automatic updating"
                     android:defaultValue="true"/>
 
     <ListPreference android:key="PREF_UPDATE_FREQ"
@@ -16,10 +16,10 @@
                     android:defaultValue="60"/>
 
     <ListPreference android:key="PREF_MIN_MAG"
-        android:title="Minumum magnitude"
-        android:summary="Select the minimum magnitude earthquake to report"
-        android:entries="@array/magnitude_options"
-        android:entryValues="@array/magnitude"
-        android:dialogTitle="Magnitude"
-        android:defaultValue="0"/>
+                    android:title="Minimum magnitude"
+                    android:summary="Select the minimum magnitude earthquake to report"
+                    android:entries="@array/magnitude_options"
+                    android:entryValues="@array/magnitude"
+                    android:dialogTitle="Magnitude"
+                    android:defaultValue="0"/>
 </PreferenceScreen>

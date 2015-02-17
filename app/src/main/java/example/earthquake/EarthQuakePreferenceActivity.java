@@ -13,7 +13,7 @@ import java.util.List;
  * Created by nosovpavel on 14/10/14.
  */
 
-public class FragmentPreferences extends PreferenceActivity {
+public class EarthQuakePreferenceActivity extends PreferenceActivity {
 
     @Override
     public void onBuildHeaders(List<Header> target) {

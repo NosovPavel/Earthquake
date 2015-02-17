@@ -16,15 +16,19 @@ import android.util.Log;
 import java.sql.SQLException;
 import java.util.HashMap;
 
-/**
+/*
  * Created by nosovpavel on 18/11/14.
- *
+ * Источники  данных  (ContentProvider)  предоставляют  интерфейс  для  публикации
+ * данных,  которые  будут  использоваться  с  помощью  объектов  ContentResolver.  Они
+ * позволяют  отделить  компоненты  приложения,  которые  потребляют  информацию,
+ * от  исходных  источников  данных,  предоставляя  обобщенный  механизм,  благодаря
+ * которому  приложения  могут  делиться  своими  данными  или  использовать  чужие.
  */
-public class EarthQuakeProvider extends ContentProvider {
+
+
+public class EarthQuakeContentProvider extends ContentProvider {
 
     public static final Uri CONTENT_URI = Uri.parse("content://com.paad.earthquakeprovider/earthquakes");
-
-
 
     //Names of fields
     public static final String KEY_ID ="_id";
@@ -42,11 +46,12 @@ public class EarthQuakeProvider extends ContentProvider {
 
     EarthQuakeDataBaseHelper dataBaseHelper;
 
+    //Ассоциативный массив, с его помощью будет предоставляться проекция для для поддержки поисковых данных
     private static final HashMap<String, String> SEARCH_PROJECTION_MAP;
     static {
         SEARCH_PROJECTION_MAP = new HashMap<String, String>();
         SEARCH_PROJECTION_MAP.put(SearchManager.SUGGEST_COLUMN_TEXT_1,KEY_SUMMARY + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_1);
-        SEARCH_PROJECTION_MAP.put("_id",KEY_ID + " AS "+ "_id");
+        SEARCH_PROJECTION_MAP.put("_id", KEY_ID + " AS "+ "_id");
     }
 
     private static final UriMatcher uriMatcher;
@@ -71,9 +76,19 @@ public class EarthQuakeProvider extends ContentProvider {
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sort) {
-        SQLiteDatabase database = dataBaseHelper.getReadableDatabase();
+
+        //Откроем БД
+        SQLiteDatabase database;
+        try {
+          database  = dataBaseHelper.getWritableDatabase();
+        } catch (Exception ex){
+          database  = dataBaseHelper.getReadableDatabase();
+        }
+
+        //  Используйте  SQLiteQueryBuilder  для  упрощенного  построения  запроса    к  базе  данных.
         SQLiteQueryBuilder sqLiteQueryBuilder = new SQLiteQueryBuilder();
 
+        //  Укажите  таблицу,  к  которой  будет  выполнен  запрос.  Это  может  быть  конкретная  таблица  или  их  совокупность.
         sqLiteQueryBuilder.setTables(EarthQuakeDataBaseHelper.EARTHQUAKE_TABLE);
 
         //Если это запрос строки то ограничиваем его одной строкой
@@ -106,6 +121,15 @@ public class EarthQuakeProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
+
+        /*
+        После  выполнения  запросов  вы  должны  указать  MIME-тип,  чтобы  идентифи¬
+        цировать  возвращаемые  данные.  Для  этого  нужно  переопределить  метод  getType,
+        чтобы  вернуть  строку,  которая  уникальным  образом  описывает  тип  ваших  данных.
+        Возвращаемый  тип  должен  поддерживать  одиночную  запись  и  все  записи  це¬
+        ликом:
+         */
+
         switch (uriMatcher.match(uri)){
             case QUAKES: return "vnd.android.cursor.dir/vnd.paad.earthquake";
             case QUAKE_ID: return "vnd.android.cursor.item/vnd.paad.earthquake";

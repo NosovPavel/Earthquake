@@ -16,7 +16,7 @@
         tools:layout="@layout/simple_list_item_1" />
 
     <fragment
-        android:name="example.earthquake.earthQuakeMapFragment"
+        android:name="example.earthquake.EarthQuakeMapFragment"
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
         android:id="@+id/earthQuakeMapFragment"
