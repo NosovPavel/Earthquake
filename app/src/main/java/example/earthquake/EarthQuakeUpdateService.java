@@ -1,6 +1,7 @@
 package example.earthquake;
 
 import android.app.AlarmManager;
+import android.app.IntentService;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
@@ -31,7 +32,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.TimerTask;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -40,7 +40,7 @@ import javax.xml.parsers.ParserConfigurationException;
 /**
  * Created by nosovpavel on 20/11/14.
  */
-public class EarthQuakeService extends Service {
+public class EarthQuakeUpdateService extends IntentService {
     public static final String TAG = "EARTHQUAKE_UPDATE_SERVICE";
     public static final String PREF_AUTO_UPDATE = "PREF_AUTO_UPDATE";
     public static final String PREF_MIN_MAG = "PREF_MIN_MAG";
@@ -49,10 +49,42 @@ public class EarthQuakeService extends Service {
     private AlarmManager alarmManager;
     private PendingIntent alarmIntent;
 
+    /**
+     * Creates an IntentService.  Invoked by your subclass's constructor.
+     *
+     * @param name Used to name the worker thread, important only for debugging.
+     */
+    public EarthQuakeUpdateService(String name) {
+        super(name);
+    }
+
+    public EarthQuakeUpdateService() {
+        super("EarthQuakeUpdateService");
+    }
+
 
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    @Override
+    protected void onHandleIntent(Intent intent) {
+        //  Получите  Общие  настройки.
+        Context context = getApplicationContext();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+        int updateFreq = Integer.parseInt(prefs.getString(PREF_UPDATE_FREQ, "60"));
+        boolean autoUpdateChecked = prefs.getBoolean(PREF_AUTO_UPDATE, false);
+
+        if (autoUpdateChecked) {
+            int alarmType = AlarmManager.ELAPSED_REALTIME_WAKEUP;
+            long timeToRefresh = SystemClock.elapsedRealtime() + updateFreq * 60 * 1000;
+            alarmManager.setInexactRepeating(alarmType, timeToRefresh, updateFreq * 60 * 1000, alarmIntent);
+        } else {
+            alarmManager.cancel(alarmIntent);
+        }
+        refreshEarthQuakes();
     }
 
     private void addNewQuake(Quake _quake) {
@@ -60,44 +92,44 @@ public class EarthQuakeService extends Service {
         ContentResolver cr = getContentResolver();
         String where = EarthQuakeContentProvider.KEY_DATE + " = " + _quake.getDate().getTime();
 
-        Cursor query = cr.query(EarthQuakeContentProvider.CONTENT_URI,null,where,null,null);
+        Cursor query = cr.query(EarthQuakeContentProvider.CONTENT_URI, null, where, null, null);
 
-        if(query.getCount()==0){
+        if (query.getCount() == 0) {
             ContentValues values = new ContentValues();
-            values.put(EarthQuakeContentProvider.KEY_DATE,_quake.getDate().getTime());
-            values.put(EarthQuakeContentProvider.KEY_DETAILS,_quake.getDetails());
-            values.put(EarthQuakeContentProvider.KEY_SUMMARY,_quake.toString());
+            values.put(EarthQuakeContentProvider.KEY_DATE, _quake.getDate().getTime());
+            values.put(EarthQuakeContentProvider.KEY_DETAILS, _quake.getDetails());
+            values.put(EarthQuakeContentProvider.KEY_SUMMARY, _quake.toString());
 
             double lat = _quake.getLocation().getLatitude();
             double lng = _quake.getLocation().getLongitude();
 
-            values.put(EarthQuakeContentProvider.KEY_LOCATION_LAT,lat);
-            values.put(EarthQuakeContentProvider.KEY_LOCATION_LNG,lng);
+            values.put(EarthQuakeContentProvider.KEY_LOCATION_LAT, lat);
+            values.put(EarthQuakeContentProvider.KEY_LOCATION_LNG, lng);
 
-            values.put(EarthQuakeContentProvider.KEY_LINK,_quake.getLink());
-            values.put(EarthQuakeContentProvider.KEY_MAGNITUDE,_quake.getMagnitude());
+            values.put(EarthQuakeContentProvider.KEY_LINK, _quake.getLink());
+            values.put(EarthQuakeContentProvider.KEY_MAGNITUDE, _quake.getMagnitude());
 
-            cr.insert(EarthQuakeContentProvider.CONTENT_URI,values);
+            cr.insert(EarthQuakeContentProvider.CONTENT_URI, values);
 
         }
         query.close();
     }
 
-    public void refreshEarthQuakes(){
+    public void refreshEarthQuakes() {
 
         URL url;
 
-        try{
+        try {
             String quakesFeed = getString(R.string.earth_Quake_Feed);
             url = new URL(quakesFeed);
 
             URLConnection connection;
             connection = url.openConnection();
 
-            HttpURLConnection httpURLConnection = (HttpURLConnection)connection;
+            HttpURLConnection httpURLConnection = (HttpURLConnection) connection;
             int responseCode = httpURLConnection.getResponseCode();
 
-            if(responseCode == HttpURLConnection.HTTP_OK){
+            if (responseCode == HttpURLConnection.HTTP_OK) {
                 InputStream in = httpURLConnection.getInputStream();
 
                 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -109,26 +141,26 @@ public class EarthQuakeService extends Service {
                 //Получаем список всех записей о землетрясениях
 
                 DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-                Date qdate = new GregorianCalendar(0,0,0).getTime();
+                Date qdate = new GregorianCalendar(0, 0, 0).getTime();
 
                 NodeList nl = docEle.getElementsByTagName("entry");
-                if (nl != null && nl.getLength()>0){
+                if (nl != null && nl.getLength() > 0) {
 
 
                     for (int i = 0; i < nl.getLength(); i++) {
 //                        Log.w(TAG, "i =" + i + "Length =" + nl.getLength());
 
                         Element entry = (Element) nl.item(i);
-                        Element title = (Element)entry.getElementsByTagName("title").item(0);
-                        Element q =(Element)entry.getElementsByTagName("georss:point").item(0);
-                        Element when = (Element)entry.getElementsByTagName("updated").item(0);
-                        Element link = (Element)entry.getElementsByTagName("link").item(0);
+                        Element title = (Element) entry.getElementsByTagName("title").item(0);
+                        Element q = (Element) entry.getElementsByTagName("georss:point").item(0);
+                        Element when = (Element) entry.getElementsByTagName("updated").item(0);
+                        Element link = (Element) entry.getElementsByTagName("link").item(0);
 
                         String details = title.getFirstChild().getNodeValue();
                         String hostName = "http://earthquake.usgs.gov";
-                        String linkString = hostName+link.getAttribute("href");
+                        String linkString = hostName + link.getAttribute("href");
                         String point;
-                        if (q!=null) {
+                        if (q != null) {
                             point = q.getFirstChild().getNodeValue();
                         } else {
                             point = "12.4670 -88.2750";
@@ -136,10 +168,10 @@ public class EarthQuakeService extends Service {
                         String dt = when.getFirstChild().getNodeValue();
 
                         try {
-                            qdate =  (Date) formatter.parse(dt);
+                            qdate = (Date) formatter.parse(dt);
                         } catch (ParseException e) {
                             e.printStackTrace();
-                            Log.d(TAG,"Date Parsing Exception");
+                            Log.d(TAG, "Date Parsing Exception");
                         }
 
                         String[] location = point.split(" ");
@@ -150,15 +182,15 @@ public class EarthQuakeService extends Service {
                         String magnitudeString = details.split(" ")[1];
                         double magnitude;
 
-                        int end = magnitudeString.length()-1;
-                        try{
-                            magnitude = Double.parseDouble(magnitudeString.substring(0,end));
+                        int end = magnitudeString.length() - 1;
+                        try {
+                            magnitude = Double.parseDouble(magnitudeString.substring(0, end));
                             details = details.split(",")[1].trim();
-                        } catch (Exception e){
+                        } catch (Exception e) {
                             magnitude = 0;
                         }
 
-                        final Quake quake = new Quake(qdate,details,l,magnitude,linkString);
+                        final Quake quake = new Quake(qdate, details, l, magnitude, linkString);
 
                         addNewQuake(quake);
                     }
@@ -168,67 +200,29 @@ public class EarthQuakeService extends Service {
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
-            Log.d(TAG,"MalformedURLException");
+            Log.d(TAG, "MalformedURLException");
         } catch (IOException e) {
             e.printStackTrace();
-            Log.d(TAG,"IOException");
+            Log.d(TAG, "IOException");
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
-            Log.d(TAG,"ParserConfigurationException");
+            Log.d(TAG, "ParserConfigurationException");
         } catch (SAXException e) {
             e.printStackTrace();
-            Log.d(TAG,"SAXException");
-        }
-        finally {
-            stopSelf();
+            Log.d(TAG, "SAXException");
+        } finally {
         }
     }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-            //  Получите  Общие  настройки.
-            Context context  =  getApplicationContext();
-            SharedPreferences prefs  =  PreferenceManager.getDefaultSharedPreferences(context);
-            int  updateFreq  =  Integer.parseInt(prefs.getString(PREF_UPDATE_FREQ, "60"));
-            boolean  autoUpdateChecked  =  prefs.getBoolean(PREF_AUTO_UPDATE,  false);
-
-            if  (autoUpdateChecked)  {
-
-                int alarmType = AlarmManager.ELAPSED_REALTIME_WAKEUP;
-                long timeToRefresh = SystemClock.elapsedRealtime()+updateFreq*60*1000;
-
-                alarmManager.setInexactRepeating(alarmType,timeToRefresh,updateFreq*60*1000,alarmIntent);
-            }
-            else  {
-
-                alarmManager.cancel(alarmIntent);
-
-                Thread  t  =  new  Thread(new  Runnable() 	{
-                    public  void  run()  {
-                        refreshEarthQuakes();
-                    }
-                });
-                t.start();
-            }
-            return  Service.START_NOT_STICKY;
-        };
-
-    private TimerTask doRefresh  =  new  TimerTask()  {
-        public  void  run(){
-            refreshEarthQuakes();
-        }
-    };
-
 
     @Override
     public void onCreate() {
         super.onCreate();
         alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-        String alarmAction = EarthQuakeAlarmReciever.ACTION_REFRESH_EARTHQUAKE_ALARM;
+        String alarmAction = EarthQuakeAlarmReceiver.ACTION_REFRESH_EARTHQUAKE_ALARM;
 
         Intent intentToFire = new Intent(alarmAction);
 
-        alarmIntent = PendingIntent.getBroadcast(this,0,intentToFire,0);
+        alarmIntent = PendingIntent.getBroadcast(this, 0, intentToFire, 0);
     }
 
     @Override

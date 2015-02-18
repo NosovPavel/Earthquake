@@ -104,7 +104,7 @@ public class MainActivity extends Activity {
         boolean returnValue = false;
 
             if (item.getItemId() == R.id.menu_refresh){
-                startService(new Intent(this, EarthQuakeService.class));
+                startService(new Intent(this, EarthQuakeUpdateService.class));
                 returnValue =  true;
             }
             if (item.getItemId() == R.id.menu_settings){
@@ -121,9 +121,9 @@ public class MainActivity extends Activity {
         Context context = getApplicationContext();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
-        minimumMagnitude = Integer.parseInt(prefs.getString(EarthQuakeService.PREF_MIN_MAG,"1"));
-        updateFreq = Integer.parseInt(prefs.getString(EarthQuakeService.PREF_UPDATE_FREQ, "60"));
-        autoUpdateChecked = prefs.getBoolean(EarthQuakeService.PREF_AUTO_UPDATE,false);
+        minimumMagnitude = Integer.parseInt(prefs.getString(EarthQuakeUpdateService.PREF_MIN_MAG,"1"));
+        updateFreq = Integer.parseInt(prefs.getString(EarthQuakeUpdateService.PREF_UPDATE_FREQ, "60"));
+        autoUpdateChecked = prefs.getBoolean(EarthQuakeUpdateService.PREF_AUTO_UPDATE,false);
     }
 
     @Override

@@ -24,8 +24,13 @@ public class EarthQuakeListFragment extends ListFragment implements LoaderManage
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        int LayoutId = android.R.layout.simple_list_item_1;
-        adapter = new SimpleCursorAdapter(getActivity(),android.R.layout.simple_list_item_1,null,new String[]{EarthQuakeContentProvider.KEY_SUMMARY},new int[]{android.R.id.text1},0);
+//        int LayoutId = android.R.layout.simple_list_item_2;
+        adapter = new SimpleCursorAdapter(getActivity(),
+                android.R.layout.simple_list_item_1,
+                null,
+                new String[]{EarthQuakeContentProvider.KEY_SUMMARY},
+                new int[]{android.R.id.text1},
+                0);
         setListAdapter(adapter);
         getLoaderManager().initLoader(0,null,this);
         refreshEarthQuakes();
@@ -33,7 +38,7 @@ public class EarthQuakeListFragment extends ListFragment implements LoaderManage
 
     private void refreshEarthQuakes() {
         getLoaderManager().restartLoader(0,null,EarthQuakeListFragment.this);
-        getActivity().startService(new Intent(getActivity(),EarthQuakeService.class));
+        getActivity().startService(new Intent(getActivity(),EarthQuakeUpdateService.class));
     }
 
 
