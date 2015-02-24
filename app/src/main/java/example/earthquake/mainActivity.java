@@ -28,6 +28,8 @@ public class MainActivity extends Activity {
     TabListener<EarthQuakeListFragment> listTabListener;
     TabListener<EarthQuakeMapFragment> mapTabListener;
 
+    private static String ACTION_BAR_INDEX = "ACTION_BAR_INDEX";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +119,7 @@ public class MainActivity extends Activity {
         return returnValue;
     }
 
+
     public void getNewDataFromPreferences(){
         Context context = getApplicationContext();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -135,7 +138,6 @@ public class MainActivity extends Activity {
         }
     }
 
-    private static String ACTION_BAR_INDEX = "ACTION_BAR_INDEX";
 
     @Override
     public void onSaveInstanceState(Bundle outState) {

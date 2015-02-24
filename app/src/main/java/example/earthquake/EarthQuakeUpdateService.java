@@ -2,6 +2,8 @@ package example.earthquake;
 
 import android.app.AlarmManager;
 import android.app.IntentService;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
@@ -10,7 +12,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.location.Location;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -48,6 +53,9 @@ public class EarthQuakeUpdateService extends IntentService {
 
     private AlarmManager alarmManager;
     private PendingIntent alarmIntent;
+
+    private Notification.Builder earthQuakeNotificationBuilder;
+    public static final  int NOTIFICATION_ID= 1;
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
@@ -109,10 +117,48 @@ public class EarthQuakeUpdateService extends IntentService {
             values.put(EarthQuakeContentProvider.KEY_LINK, _quake.getLink());
             values.put(EarthQuakeContentProvider.KEY_MAGNITUDE, _quake.getMagnitude());
 
+             //
+            broadcastNotification(_quake);
+
             cr.insert(EarthQuakeContentProvider.CONTENT_URI, values);
 
         }
         query.close();
+    }
+
+    private void broadcastNotification(Quake quake){
+
+        double  vibrateLength  =  100*Math.exp(0.53*quake.getMagnitude());
+        long[]  vibrate  =  new  long[]  {100,  100, 	(long)vibrateLength  };
+        earthQuakeNotificationBuilder.setVibrate(vibrate)  ;
+
+        if(quake.getMagnitude()>6){
+            Uri ringUri  = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            earthQuakeNotificationBuilder.setSound(ringUri);
+        }
+
+        int color;
+        if(quake.getMagnitude()<5.4){
+            color = Color.GREEN;
+        }
+         else if (quake.getMagnitude()<6){
+            color = Color.YELLOW;
+        }
+        else {
+            color = Color.RED;
+        }
+
+        Intent  startActivitylntent  =  new  Intent(this,  Quake.class);
+        PendingIntent  launchlntent  =
+                PendingIntent.getActivity(this,  0,  startActivitylntent,  0);
+        earthQuakeNotificationBuilder
+                .setContentIntent(launchlntent)
+                .setWhen(quake.getDate().getTime())
+                .setContentTitle("M:"  +  quake.getMagnitude()).setContentText(quake.getDetails());
+            NotificationManager  notificationManager  =  (NotificationManager)getSystemService
+                    (Context.NOTIFICATION_SERVICE);
+            notificationManager.notify(NOTIFICATION_ID,
+                    earthQuakeNotificationBuilder.getNotification());
     }
 
     public void refreshEarthQuakes() {
@@ -223,6 +269,9 @@ public class EarthQuakeUpdateService extends IntentService {
         Intent intentToFire = new Intent(alarmAction);
 
         alarmIntent = PendingIntent.getBroadcast(this, 0, intentToFire, 0);
+
+        earthQuakeNotificationBuilder = new Notification.Builder(this);
+        earthQuakeNotificationBuilder.setAutoCancel(true).setTicker("Earthquake detected").setSmallIcon(R.drawable.ic_launcher);
     }
 
     @Override
