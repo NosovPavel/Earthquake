@@ -5,6 +5,7 @@
     android:searchSettingsDescription="@string/search_description"
     android:searchSuggestAuthority="com.paad.earthquakeprovider"
     android:searchSuggestIntentAction="android.intent.action.VIEW"
+    android:includeInGlobalSearch="true"
     android:searchSuggestIntentData="content://com.paad.earthquakeprovider/earthquakes"
     android:hint="Enter the name of location">
 </searchable>

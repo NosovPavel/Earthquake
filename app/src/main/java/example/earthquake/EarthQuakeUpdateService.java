@@ -5,7 +5,6 @@ import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -51,8 +50,14 @@ public class EarthQuakeUpdateService extends IntentService {
     public static final String PREF_MIN_MAG = "PREF_MIN_MAG";
     public static final String PREF_UPDATE_FREQ = "PREF_UPDATE_FREQ";
 
+    public static final String QUAKES_REFRESHED = "com.paad.earthquake.QUAKES_REFRESHED";
+
     private AlarmManager alarmManager;
     private PendingIntent alarmIntent;
+
+    private Context context;
+    private SharedPreferences prefs;
+    private int minimumMagnitude;
 
     private Notification.Builder earthQuakeNotificationBuilder;
     public static final  int NOTIFICATION_ID= 1;
@@ -93,6 +98,7 @@ public class EarthQuakeUpdateService extends IntentService {
             alarmManager.cancel(alarmIntent);
         }
         refreshEarthQuakes();
+        sendBroadcast(new Intent(QUAKES_REFRESHED));
     }
 
     private void addNewQuake(Quake _quake) {
@@ -117,7 +123,6 @@ public class EarthQuakeUpdateService extends IntentService {
             values.put(EarthQuakeContentProvider.KEY_LINK, _quake.getLink());
             values.put(EarthQuakeContentProvider.KEY_MAGNITUDE, _quake.getMagnitude());
 
-             //
             broadcastNotification(_quake);
 
             cr.insert(EarthQuakeContentProvider.CONTENT_URI, values);
@@ -128,37 +133,41 @@ public class EarthQuakeUpdateService extends IntentService {
 
     private void broadcastNotification(Quake quake){
 
-        double  vibrateLength  =  100*Math.exp(0.53*quake.getMagnitude());
-        long[]  vibrate  =  new  long[]  {100,  100, 	(long)vibrateLength  };
-        earthQuakeNotificationBuilder.setVibrate(vibrate)  ;
+        //Если выбранная в настройках минимальная магнитуда меньше чем у текущего землетрясения, то показываем его
+        if(quake.getMagnitude() >= minimumMagnitude) {
 
-        if(quake.getMagnitude()>6){
-            Uri ringUri  = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            earthQuakeNotificationBuilder.setSound(ringUri);
-        }
+            double vibrateLength = 100 * Math.exp(0.53 * quake.getMagnitude());
+            long[] vibrate = new long[]{100, 100, (long) vibrateLength};
+            earthQuakeNotificationBuilder.setVibrate(vibrate);
 
-        int color;
-        if(quake.getMagnitude()<5.4){
-            color = Color.GREEN;
-        }
-         else if (quake.getMagnitude()<6){
-            color = Color.YELLOW;
-        }
-        else {
-            color = Color.RED;
-        }
+            if (quake.getMagnitude() > 6) {
+                Uri ringUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                earthQuakeNotificationBuilder.setSound(ringUri);
+            }
 
-        Intent  startActivitylntent  =  new  Intent(this,  Quake.class);
-        PendingIntent  launchlntent  =
-                PendingIntent.getActivity(this,  0,  startActivitylntent,  0);
-        earthQuakeNotificationBuilder
-                .setContentIntent(launchlntent)
-                .setWhen(quake.getDate().getTime())
-                .setContentTitle("M:"  +  quake.getMagnitude()).setContentText(quake.getDetails());
-            NotificationManager  notificationManager  =  (NotificationManager)getSystemService
+            int color;
+            if (quake.getMagnitude() < 5.4) {
+                color = Color.GREEN;
+            } else if (quake.getMagnitude() < 6) {
+                color = Color.YELLOW;
+            } else {
+                color = Color.RED;
+            }
+
+            Intent startActivitylntent = new Intent(this, Quake.class);
+            PendingIntent launchlntent =
+                    PendingIntent.getActivity(this, 0, startActivitylntent, 0);
+            earthQuakeNotificationBuilder
+                    .setContentIntent(launchlntent)
+                    .setWhen(quake.getDate().getTime())
+                    .setContentTitle("M:" + quake.getMagnitude()).setContentText(quake.getDetails());
+            NotificationManager notificationManager = (NotificationManager) getSystemService
                     (Context.NOTIFICATION_SERVICE);
             notificationManager.notify(NOTIFICATION_ID,
                     earthQuakeNotificationBuilder.getNotification());
+        } else {
+            return;
+        }
     }
 
     public void refreshEarthQuakes() {
@@ -243,7 +252,6 @@ public class EarthQuakeUpdateService extends IntentService {
                 }
             }
 
-
         } catch (MalformedURLException e) {
             e.printStackTrace();
             Log.d(TAG, "MalformedURLException");
@@ -277,5 +285,37 @@ public class EarthQuakeUpdateService extends IntentService {
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+
+
+
+
+    public Context getContext() {
+        if(context == null) {
+            context = getApplicationContext();
+        }
+        return context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    public SharedPreferences getPrefs() {
+        if(prefs == null)
+            prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        return prefs;
+    }
+
+    public void setPrefs(SharedPreferences prefs) {
+        this.prefs = prefs;
+    }
+
+    public int getMinimumMagnitude() {
+        return Integer.parseInt(getPrefs().getString(EarthQuakeUpdateService.PREF_MIN_MAG, "1"));
+    }
+
+    public void setMinimumMagnitude(int minimumMagnitude) {
+        this.minimumMagnitude = minimumMagnitude;
     }
 }

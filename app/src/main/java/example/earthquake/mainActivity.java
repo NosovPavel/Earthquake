@@ -38,12 +38,6 @@ public class MainActivity extends Activity {
 
         getNewDataFromPreferences();
 
-//
-//        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-//        SearchableInfo searchableInfo = searchManager.getSearchableInfo(getComponentName());
-//        SearchView searchView = (SearchView) findViewById(R.id.searchView);
-//        searchView.setSearchableInfo(searchableInfo);
-
         ActionBar actionBar = getActionBar();
 
         View fragmentContainer = findViewById(R.id.EarthQuakeFragmentContainer);
@@ -87,12 +81,9 @@ public class MainActivity extends Activity {
                 searchManager.getSearchableInfo(getComponentName());
 
         // Bind the Activity's SearchableInfo to the Search View
-        SearchView searchView = (SearchView)menu.findItem(R.id.menu_search).getActionView();
+        SearchView searchView = (SearchView)menu.findItem(R.id.menu_search_bar).getActionView();
         searchView.setSearchableInfo(searchableInfo);
 
-
-        // Inflate the menu; this adds items to the action bar if it is present.
-//        menu.add(0,1,0, R.string.menu_preferences);
         return true;
     }
 
@@ -110,10 +101,15 @@ public class MainActivity extends Activity {
                 returnValue =  true;
             }
             if (item.getItemId() == R.id.menu_settings){
-//                Class c = Build.VERSION.SDK_INT<Build.VERSION_CODES.HONEYCOMB? PreferenceActivity.class:EarthQuakePreferenceActivity.class;
                 Class c = EarthQuakePreferenceActivity.class;
                 Intent i = new Intent(this,c);
                 startActivityForResult(i,SHOW_PREFERENCES);
+                returnValue = true;
+            }
+            if (item.getItemId() == R.id.menu_search){
+                Class c = EarthQuakeSearchResultsActivity.class;
+                Intent i = new Intent(this,c);
+                startActivity(i);
                 returnValue = true;
             }
         return returnValue;
